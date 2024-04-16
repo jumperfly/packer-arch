@@ -25,9 +25,10 @@ jobs:
       - run: sudo apt-get install --no-install-recommends -y qemu-system-x86 qemu-utils qemu-kvm libvirt-daemon-system
       - run: sudo chmod a+rw /dev/kvm
 
-      # Set the patch version to an integer representation of the git commit hash
-      - name: Compute version
-        run: echo "PKR_VAR_version_patch=$((16#$(git rev-parse --short HEAD)))" >> $GITHUB_ENV
+      - name: Compute version and description
+        run: |
+          echo "PKR_VAR_box_version=$(date +'%Y%m%d.%H%M%S')" >> $GITHUB_ENV
+          echo "PKR_VAR_box_version_description=$(git log --pretty=format:'%h: %s')" >> $GITHUB_ENV
 
       - run: packer init .
       - run: packer validate .

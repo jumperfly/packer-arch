@@ -12,16 +12,29 @@ packer {
 }
 
 variables {
-  boot_wait     = "30s"
-  version_patch = "1"
+  boot_wait               = "30s"
+  box_version             = ""
+  box_version_description = ""
 }
 
 locals {
-  version_year  = "2024"
-  version_month = "04"
-  version_day   = "01"
-  version       = "${local.version_year}.${local.version_month}.${local.version_day}"
-  iso_checksum  = "sha256:52aea58f88c9a80afe64f0536da868251ef4878de5a5e0227fcada9f132bd7ab"
+  now = timestamp()
+
+  box_tag = "jumperfly/archlinux"
+  box_version = coalesce(
+    # Use box_version from variable if set
+    var.box_version,
+    # Otherwise default to 0.<date>.<time>
+    formatdate("0.YYYYMMDD.hhmmss", local.now)
+  )
+
+  iso = {
+    year     = "2024"
+    month    = "04"
+    day      = "01"
+    checksum = "sha256:52aea58f88c9a80afe64f0536da868251ef4878de5a5e0227fcada9f132bd7ab"
+  }
+  iso_version = "${local.iso.year}.${local.iso.month}.${local.iso.day}"
 }
 
 source "qemu" "base" {
@@ -29,8 +42,8 @@ source "qemu" "base" {
   headless       = true
   memory         = 1024
   disk_size      = 10240
-  iso_url        = "https://mirrors.edge.kernel.org/archlinux/iso/${local.version}/archlinux-${local.version}-x86_64.iso"
-  iso_checksum   = local.iso_checksum
+  iso_url        = "https://mirrors.edge.kernel.org/archlinux/iso/${local.iso_version}/archlinux-${local.iso_version}-x86_64.iso"
+  iso_checksum   = local.iso.checksum
   ssh_username   = "root"
   ssh_password   = "packer"
   ssh_timeout    = "1m"
@@ -55,8 +68,9 @@ build {
     }
 
     post-processor "vagrant-cloud" {
-      box_tag = "jumperfly/arch"
-      version = "0.${local.version_year}${local.version_month}.${var.version_patch}"
+      box_tag             = local.box_tag
+      version             = local.box_version
+      version_description = var.box_version_description
     }
   }
 }

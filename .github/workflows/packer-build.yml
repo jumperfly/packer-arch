@@ -1,0 +1,34 @@
+name: Packer Build
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PACKER_VERSION: "1.10.2"
+  VAGRANT_CLOUD_TOKEN: ${{ secrets.VAGRANT_CLOUD_TOKEN }}
+  PKR_VAR_boot_wait: "60s"
+
+jobs:
+  packer:
+    runs-on: ubuntu-22.04
+    name: Run Packer
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-packer@v3
+        with:
+          version: ${{ env.PACKER_VERSION }}
+
+      - run: sudo apt-get update
+      - run: sudo apt-get install --no-install-recommends -y qemu-system-x86 qemu-utils qemu-kvm libvirt-daemon-system
+      - run: sudo chmod a+rw /dev/kvm
+
+      # Set the patch version to an integer representation of the git commit hash
+      - name: Compute version
+        run: echo "PKR_VAR_version_patch=$((16#$(git rev-parse --short HEAD)))" >> $GITHUB_ENV
+
+      - run: packer init .
+      - run: packer validate .
+      - run: packer build .

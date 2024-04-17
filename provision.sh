@@ -19,7 +19,7 @@ curl -L \
   'https://archlinux.org/mirrorlist/?country=GB&protocol=https&ip_version=4&use_mirror_status=on' \
   | sed 's/#Server/Server/' > /etc/pacman.d/mirrorlist
 
-pacstrap -K /mnt base linux grub openssh sudo
+pacstrap -K /mnt base linux grub openssh sudo python
 
 genfstab -U /mnt >> /mnt/etc/fstab
 

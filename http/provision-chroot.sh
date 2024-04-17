@@ -47,3 +47,4 @@ chmod 600 /home/vagrant/.ssh/*
 pacman -Scc --noconfirm
 rm -f /var/cache/pacman/pkg/*
 rm -f /var/lib/pacman/sync/*
+rm /etc/machine-id

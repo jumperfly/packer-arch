@@ -13,14 +13,20 @@ Requires
 
 Run `packer init .` before the first build.
 
-Run `packer build -except vagrant-cloud .`
+Build the base qemu image from ISO: `packer build packer-iso.pkr.hcl`
 
-The resulting vagrant box is saved to `output-boxes`
+Build the vagrant boxes from the base image above: `packer build packer-main.pkr.hcl`
+
+The resulting vagrant boxes are saved to `output-boxes`
 
 ## Running Locally
 
+Requires:
+  - vagrant 2.4.1+
+  - vagrant-libvirt plugin 0.12.2+
+
 Run the supplied script: `./local-run.sh`.
 
-This essentially wraps `vagrant up` while ensuring the latest built box is imported.
+This essentially wraps `vagrant up` while ensuring the latest built boxes are imported.
 
-It will attempt to cleanup previously imported libvirt arch images provided they are stored in the default /var/lib/libvirt/images
+It will attempt to cleanup previously imported libvirt images provided they are stored in the default /var/lib/libvirt/images

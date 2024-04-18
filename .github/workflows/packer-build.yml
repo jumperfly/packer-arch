@@ -3,7 +3,7 @@ name: Packer Build
 on:
   push:
     branches:
-      - main
+      - "*"
 
 env:
   PACKER_VERSION: "1.10.2"
@@ -31,5 +31,9 @@ jobs:
           echo "PKR_VAR_box_version_description=$(git log --pretty=format:'%h: %s')" >> $GITHUB_ENV
 
       - run: packer init .
-      - run: packer validate .
-      - run: packer build .
+
+      - run: packer validate packer-iso.pkr.hcl
+      - run: packer build packer-iso.pkr.hcl
+
+      - run: packer validate packer-main.pkr.hcl
+      - run: packer build -parallel-builds=1 ${{ github.ref == 'refs/heads/main' && '' || '-except vagrant-cloud' }} packer-main.pkr.hcl

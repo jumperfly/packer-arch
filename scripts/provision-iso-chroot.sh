@@ -42,9 +42,3 @@ curl -Lo /home/vagrant/.ssh/authorized_keys https://raw.githubusercontent.com/ha
 chown -R vagrant:vagrant /home/vagrant/.ssh
 chmod 700 /home/vagrant/.ssh
 chmod 600 /home/vagrant/.ssh/*
-
-# Clean
-pacman -Scc --noconfirm
-rm -f /var/cache/pacman/pkg/*
-rm -f /var/lib/pacman/sync/*
-rm /etc/machine-id

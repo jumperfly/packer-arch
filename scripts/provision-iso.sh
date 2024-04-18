@@ -23,12 +23,6 @@ pacstrap -K /mnt base linux grub openssh sudo python
 
 genfstab -U /mnt >> /mnt/etc/fstab
 
-curl -Lo /mnt/provision-chroot.sh ${PACKER_HTTP_ADDR}/provision-chroot.sh
-arch-chroot /mnt bash -c "DISK=$DISK bash /provision-chroot.sh"
-rm /mnt/provision-chroot.sh
-
-dd if=/dev/zero of=/mnt/ZERO bs=1M || echo "ignoring expected dd out of space error"
-rm -f /mnt/ZERO
-sync
+arch-chroot /mnt bash -c "curl -sL ${PACKER_HTTP_ADDR}/provision-iso-chroot.sh | DISK=$DISK bash"
 
 umount -R /mnt

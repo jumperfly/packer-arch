@@ -31,16 +31,19 @@ source "qemu" "iso" {
 }
 
 build {
-  name = "iso"
-
   sources = ["sources.qemu.iso"]
 
   provisioner "shell" {
     script = "scripts/provision-iso.sh"
   }
 
-  post-processor "checksum" {
-    checksum_types = ["md5"]
-    output         = "output-{{.BuildName}}/packer-{{.BuildName}}.{{.ChecksumType}}"
+  post-processors {
+    post-processor "checksum" {
+      checksum_types = ["md5"]
+      output         = "output-{{.BuildName}}/packer-{{.BuildName}}.{{.ChecksumType}}"
+    }
+    post-processor "shell-local" {
+      inline = ["scripts/convert-qcow2-to-ovf.sh output-iso/packer-iso output-iso/packer-iso.ovf"]
+    }
   }
 }

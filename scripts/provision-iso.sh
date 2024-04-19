@@ -6,11 +6,11 @@ DISK=/dev/vda
 BIOSBOOT_PARTITION="${DISK}1"
 ROOT_PARTITION="${DISK}2"
 
-parted $DISK mklabel gpt
-parted $DISK mkpart biosboot ext4 1MiB 2MiB
-parted $DISK set 1 bios_grub on
-parted $DISK mkpart root ext4 2MiB 100%
-parted $DISK type 2 4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709 # Linux root (x86-64)
+parted $DISK mklabel gpt \
+  mkpart biosboot ext4 1MiB 2MiB \
+  set 1 bios_grub on \
+  mkpart root ext4 2MiB 100% \
+  type 2 4F68BCE3-E8CD-4DB1-96E7-FBCAF984B709 # Linux root (x86-64)
 
 mkfs.ext4 $ROOT_PARTITION
 mount $ROOT_PARTITION /mnt

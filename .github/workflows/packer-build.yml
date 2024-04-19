@@ -8,7 +8,7 @@ on:
 env:
   PACKER_VERSION: "1.10.2"
   VAGRANT_CLOUD_TOKEN: ${{ secrets.VAGRANT_CLOUD_TOKEN }}
-  PKR_VAR_boot_wait: "60s"
+  PKR_VAR_boot_wait: "1m"
 
 jobs:
   packer:
@@ -21,9 +21,11 @@ jobs:
         with:
           version: ${{ env.PACKER_VERSION }}
 
+      - run: wget -O- https://www.virtualbox.org/download/oracle_vbox_2016.asc | sudo gpg --yes --output /usr/share/keyrings/oracle-virtualbox-2016.gpg --dearmor
+      - run: echo 'deb [arch=amd64 signed-by=/usr/share/keyrings/oracle-virtualbox-2016.gpg] https://download.virtualbox.org/virtualbox/debian jammy contrib' | sudo tee /etc/apt/sources.list.d/virtualbox.list
       - run: sudo apt-get update
-      - run: sudo apt-get install --no-install-recommends -y qemu-system-x86 qemu-utils qemu-kvm libvirt-daemon-system
-      - run: sudo chmod a+rw /dev/kvm
+      - run: sudo apt-get install --no-install-recommends -y qemu-system-x86 qemu-utils qemu-kvm libvirt-daemon-system virtualbox-7.0
+      - run: sudo usermod $USER -a -G kvm,vboxusers
 
       - name: Compute version and description
         run: |
@@ -32,8 +34,12 @@ jobs:
 
       - run: packer init .
 
-      - run: packer validate packer-iso.pkr.hcl
-      - run: packer build packer-iso.pkr.hcl
+      - name: Build base image
+        run: |
+          packer validate packer-iso.pkr.hcl
+          sudo -E --user $USER packer build packer-iso.pkr.hcl
 
-      - run: packer validate packer-main.pkr.hcl
-      - run: packer build -parallel-builds=1 ${{ github.ref_name != 'main' && '-except vagrant-cloud' || '' }} packer-main.pkr.hcl
+      - name: Build vagrant boxes
+        run: |
+          packer validate packer-main.pkr.hcl
+          sudo -E --user $USER packer build -parallel-builds=1 ${{ github.ref_name != 'main' && '-except vagrant-cloud' || '' }} packer-main.pkr.hcl
